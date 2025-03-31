@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LocalStorage Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Custom Glassmorphism Effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* Enhanced Glow Effect */
+    .glow:hover {
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.6), 0 0 30px rgba(0, 191, 255, 0.6);
+    }
+    /* Pulsating Glow for Buttons */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 165, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 165, 0, 0); }
+    }
+    .pulse-glow {
+      animation: pulse 2s infinite;
+    }
+    /* Card Hover Effect */
+    .data-card:hover {
+      transform: translateY(-5px);
+      transition: transform 0.2s ease;
+    }
+    /* Mobile Screen Optimization */
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    /* Sidebar Styles */
+    #sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: -250px;
+      background: #0D0D0D;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    #sidebar.open {
+      left: 0;
+    }
+    /* Overlay for Sidebar */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    #overlay.active {
+      display: block;
+    }
+    /* Light Mode Styles */
+    body.light-mode {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+    .light-mode .glass {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .light-mode .glow:hover {
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.4), 0 0 30px rgba(0, 191, 255, 0.4);
+    }
+    .light-mode #sidebar {
+      background: #ffffff;
+      color: #1f2937;
+    }
+    .light-mode #sidebar .glass {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .light-mode .data-card {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .light-mode .text-gray-400 {
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body class="bg-[#0D0D0D] text-white font-sans">
+  <!-- Overlay -->
+  <div id="overlay"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="glass p-6">
+    <div class="flex justify-between items-center">
+      <h2 class="font-bold text-lg">Menu</h2>
+      <button id="closeMenu" class="p-2 rounded-lg"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mt-8 space-y-4">
+      <button id="themeToggle" class="block py-2 hover:text-orange-500 transition w-full text-left">
+        <i class="fas fa-moon mr-2"></i>Dark Mode
+      </button>
+      <button id="resetAll" class="block py-2 hover:text-orange-500 transition w-full text-left">
+        <i class="fas fa-trash-alt mr-2"></i>Reset All Data
+      </button>
+      <button id="addNewItem" class="block py-2 hover:text-orange-500 transition w-full text-left">
+        <i class="fas fa-plus-circle mr-2"></i>Add New Item
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+          <i class="fas fa-database text-gray-400"></i>
+        </div>
+        <h1 class="font-bold text-lg">LocalStorage Manager</h1>
+      </div>
+      <div class="flex gap-3">
+        <button id="menuButton" class="glow p-2 rounded-lg"><i class="fas fa-bars"></i></button>
+      </div>
+    </header>
+
+    <!-- Stats Card -->
+    <div class="glass p-6 rounded-2xl mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <p class="text-sm text-gray-400">Total Items</p>
+          <h2 id="totalItems" class="text-3xl font-bold">0</h2>
+        </div>
+        <div>
+          <p class="text-sm text-gray-400">Storage Used</p>
+          <h2 id="storageUsed" class="text-3xl font-bold">0 KB</h2>
+        </div>
+      </div>
+      <div class="w-full bg-gray-700 rounded-full h-2.5">
+        <div id="storageBar" class="bg-gradient-to-r from-orange-500 to-blue-500 h-2.5 rounded-full" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Add New Item Form (Initially Hidden) -->
+    <div id="addItemForm" class="glass p-6 rounded-2xl mb-6 hidden">
+      <h3 class="font-bold text-lg mb-4">Add New Item</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Key</label>
+          <input id="newItemKey" type="text" class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Value</label>
+          <textarea id="newItemValue" class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button id="cancelAdd" class="w-full bg-gray-700 text-white py-2 rounded-lg glow">Cancel</button>
+          <button id="saveNewItem" class="w-full bg-gradient-to-r from-orange-500 to-blue-500 text-white py-2 rounded-lg glow pulse-glow">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Items -->
+    <div id="dataItems" class="space-y-3">
+      <!-- Items will be dynamically added here -->
+      <div id="emptyState" class="glass p-6 rounded-2xl flex flex-col items-center justify-center text-center py-10">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Data" class="w-24 h-24 mb-4 opacity-75">
+        <p class="text-gray-400">No data in localStorage yet.</p>
+        <button id="addFirstItem" class="mt-4 bg-gradient-to-r from-orange-500 to-blue-500 text-white py-2 px-4 rounded-lg glow pulse-glow">Add First Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="glass p-6 rounded-2xl w-full max-w-md mx-4 z-10">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-lg">Edit Item</h3>
+        <button id="closeEditModal" class="p-2 rounded-lg"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Key</label>
+          <input id="editItemKey" type="text" readonly class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Value</label>
+          <textarea id="editItemValue" class="w-full bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5"></textarea>
+        </div>
+        <div class="flex gap-3">
+          <button id="deleteItem" class="w-full bg-red-600 text-white py-2 rounded-lg glow">Delete</button>
+          <button id="saveEdit" class="w-full bg-gradient-to-r from-orange-500 to-blue-500 text-white py-2 rounded-lg glow pulse-glow">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Elements
+      const menuButton = document.getElementById('menuButton');
+      const closeMenu = document.getElementById('closeMenu');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const themeToggle = document.getElementById('themeToggle');
+      const body = document.body;
+      const resetAll = document.getElementById('resetAll');
+      const addNewItem = document.getElementById('addNewItem');
+      const addItemForm = document.getElementById('addItemForm');
+      const cancelAdd = document.getElementById('cancelAdd');
+      const saveNewItem = document.getElementById('saveNewItem');
+      const newItemKey = document.getElementById('newItemKey');
+      const newItemValue = document.getElementById('newItemValue');
+      const dataItems = document.getElementById('dataItems');
+      const emptyState = document.getElementById('emptyState');
+      const addFirstItem = document.getElementById('addFirstItem');
+      const editModal = document.getElementById('editModal');
+      const closeEditModal = document.getElementById('closeEditModal');
+      const editItemKey = document.getElementById('editItemKey');
+      const editItemValue = document.getElementById('editItemValue');
+      const saveEdit = document.getElementById('saveEdit');
+      const deleteItem = document.getElementById('deleteItem');
+      const totalItems = document.getElementById('totalItems');
+      const storageUsed = document.getElementById('storageUsed');
+      const storageBar = document.getElementById('storageBar');
+
+      // Current item being edited
+      let currentEditKey = null;
+
+      // Load saved theme from localStorage
+      const savedTheme = localStorage.getItem('lsm-theme');
+      if (savedTheme === 'light-mode') {
+        body.classList.add('light-mode');
+        themeToggle.innerHTML = '<i class="fas fa-sun mr-2"></i>Light Mode';
+      } else {
+        body.classList.remove('light-mode');
+        themeToggle.innerHTML = '<i class="fas fa-moon mr-2"></i>Dark Mode';
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        body.classList.toggle('light-mode');
+        if (body.classList.contains('light-mode')) {
+          localStorage.setItem('lsm-theme', 'light-mode');
+          themeToggle.innerHTML = '<i class="fas fa-sun mr-2"></i>Light Mode';
+        } else {
+          localStorage.setItem('lsm-theme', 'dark-mode');
+          themeToggle.innerHTML = '<i class="fas fa-moon mr-2"></i>Dark Mode';
+        }
+      });
+
+      // Sidebar Toggle
+      menuButton.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+      });
+
+      closeMenu.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      });
+
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      });
+
+      // Load all localStorage items
+      function loadLocalStorageItems() {
+        dataItems.innerHTML = '';
+        const items = { ...localStorage };
+        const itemKeys = Object.keys(items).filter(key => key !== 'lsm-theme');
+        
+        totalItems.textContent = itemKeys.length;
+        updateStorageUsage();
+        
+        if (itemKeys.length === 0) {
+          emptyState.classList.remove('hidden');
+          return;
+        }
+        
+        emptyState.classList.add('hidden');
+        
+        itemKeys.forEach(key => {
+          const value = items[key];
+          const card = document.createElement('div');
+          card.className = 'glass p-4 rounded-lg data-card cursor-pointer';
+          card.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-bold truncate">${key}</p>
+                <p class="text-sm text-gray-400 truncate">${value.length > 50 ? value.substring(0, 50) + '...' : value}</p>
+              </div>
+              <button class="edit-item p-2 rounded-lg glow" data-key="${key}">
+                <i class="fas fa-edit"></i>
+              </button>
+            </div>
+          `;
+          dataItems.appendChild(card);
+        });
+        
+        // Add event listeners to edit buttons
+        document.querySelectorAll('.edit-item').forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const key = button.getAttribute('data-key');
+            openEditModal(key);
+          });
+        });
+        
+        // Add click event to cards to view full content
+        document.querySelectorAll('.data-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const key = card.querySelector('.edit-item').getAttribute('data-key');
+            openEditModal(key);
+          });
+        });
+      }
+      
+      // Update storage usage stats
+      function updateStorageUsage() {
+        let totalBytes = 0;
+        for (let key in localStorage) {
+          if (localStorage.hasOwnProperty(key)) {
+            totalBytes += localStorage[key].length * 2; // Each character is 2 bytes in localStorage
+          }
+        }
+        
+        const kbUsed = (totalBytes / 1024).toFixed(2);
+        const percentageUsed = Math.min((totalBytes / (5 * 1024 * 1024)) * 100, 100); // 5MB is typical localStorage limit
+        
+        storageUsed.textContent = `${kbUsed} KB`;
+        storageBar.style.width = `${percentageUsed}%`;
+      }
+      
+      // Open edit modal
+      function openEditModal(key) {
+        currentEditKey = key;
+        editItemKey.value = key;
+        editItemValue.value = localStorage.getItem(key);
+        editModal.classList.remove('hidden');
+      }
+      
+      // Close edit modal
+      function closeEditModalHandler() {
+        editModal.classList.add('hidden');
+        currentEditKey = null;
+      }
+      
+      // Save edited item
+      function saveEditedItem() {
+        if (!currentEditKey) return;
+        
+        const newValue = editItemValue.value;
+        localStorage.setItem(currentEditKey, newValue);
+        loadLocalStorageItems();
+        closeEditModalHandler();
+      }
+      
+      // Delete current item
+      function deleteCurrentItem() {
+        if (!currentEditKey) return;
+        
+        if (confirm(`Are you sure you want to delete "${currentEditKey}"?`)) {
+          localStorage.removeItem(currentEditKey);
+          loadLocalStorageItems();
+          closeEditModalHandler();
+        }
+      }
+      
+      // Reset all data
+      function resetAllData() {
+        if (confirm('Are you sure you want to delete ALL data in localStorage? This cannot be undone!')) {
+          localStorage.clear();
+          // Keep the theme preference
+          const theme = body.classList.contains('light-mode') ? 'light-mode' : 'dark-mode';
+          localStorage.setItem('lsm-theme', theme);
+          loadLocalStorageItems();
+        }
+      }
+      
+      // Show add item form
+      function showAddItemForm() {
+        newItemKey.value = '';
+        newItemValue.value = '';
+        addItemForm.classList.remove('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
+      }
+      
+      // Hide add item form
+      function hideAddItemForm() {
+        addItemForm.classList.add('hidden');
+        if (Object.keys(localStorage).filter(key => key !== 'lsm-theme').length === 0) {
+          emptyState.classList.remove('hidden');
+        }
+      }
+      
+      // Save new item
+      function saveNewItemHandler() {
+        const key = newItemKey.value.trim();
+        const value = newItemValue.value.trim();
+        
+        if (!key) {
+          alert('Please enter a key');
+          return;
+        }
+        
+        if (localStorage.getItem(key) !== null) {
+          alert('This key already exists. Please choose a different key or edit the existing one.');
+          return;
+        }
+        
+        localStorage.setItem(key, value);
+        loadLocalStorageItems();
+        hideAddItemForm();
+      }
+      
+      // Event listeners
+      resetAll.addEventListener('click', resetAllData);
+      addNewItem.addEventListener('click', showAddItemForm);
+      addFirstItem.addEventListener('click', showAddItemForm);
+      cancelAdd.addEventListener('click', hideAddItemForm);
+      saveNewItem.addEventListener('click', saveNewItemHandler);
+      closeEditModal.addEventListener('click', closeEditModalHandler);
+      saveEdit.addEventListener('click', saveEditedItem);
+      deleteItem.addEventListener('click', deleteCurrentItem);
+      
+      // Allow Enter key to save in forms
+      newItemKey.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') saveNewItemHandler();
+      });
+      
+      newItemValue.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) saveNewItemHandler();
+      });
+      
+      editItemValue.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) saveEditedItem();
+      });
+      
+      // Initial load
+      loadLocalStorageItems();
+    });
+  </script>
+</body>
+</html>

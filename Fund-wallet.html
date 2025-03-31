@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PayNest - Fund Wallet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0D0D0D 0%, #1a1a2e 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .account-detail-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FFA500, #00BFFF);
+      transition: width 0.3s ease;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    .pulse-text {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body class="text-white font-sans p-4">
+  <div class="max-w-md mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <a href="home.html" class="glass p-2 rounded-lg">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1 class="text-xl font-bold">Fund Wallet</h1>
+      <a href="help.html" class="glass p-2 rounded-lg">
+        <i class="fas fa-question-circle"></i>
+      </a>
+    </div>
+
+    <!-- Instructions (Left-aligned) -->
+    <div class="glass p-4 rounded-xl mb-4 text-left">
+      <p class="text-gray-300 mb-1">Send money to the account below, It will be credited automatically to your wallet.</p>
+      <p class="text-orange-400 font-medium">Minimum Deposit: ₦1,000</p>
+    </div>
+
+    <!-- Account Details -->
+    <div class="account-detail-card rounded-xl p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="text-left">
+          <p class="text-xs text-gray-400">Account Number</p>
+          <p class="font-mono text-lg">6410068206</p>
+        </div>
+        <button class="copy-btn glass p-2 rounded-lg">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+      
+      <div class="flex justify-between items-center mb-3">
+        <div class="text-left">
+          <p class="text-xs text-gray-400">Bank Name</p>
+          <p class="text-lg">Moniepoint</p>
+        </div>
+        <button class="copy-btn glass p-2 rounded-lg">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <div class="text-left">
+          <p class="text-xs text-gray-400">Account Name</p>
+          <p class="text-lg">GETSUB - POP</p>
+        </div>
+        <button class="copy-btn glass p-2 rounded-lg">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Button -->
+    <button id="paymentBtn" class="w-full bg-gradient-to-r from-orange-500 to-blue-500 py-3 rounded-lg font-medium mb-4">
+      I've Made Payment
+    </button>
+
+    <!-- Loading Bar (Hidden Initially) -->
+    <div id="loadingBar" class="hidden mb-4">
+      <div class="progress-bar rounded-full">
+        <div id="progressFill" class="progress-fill rounded-full" style="width:0%"></div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1 text-left">Processing payment...</p>
+    </div>
+
+    <!-- Failure Message (Hidden Initially) -->
+    <div id="failureMsg" class="hidden glass p-4 rounded-xl text-left mb-4">
+      <div class="flex items-center text-red-400 mb-2">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <p class="font-medium">Payment failed</p>
+      </div>
+      <p class="text-sm">Retry and get <span class="text-green-400 font-bold">₦5,000</span> bonus if successful</p>
+    </div>
+
+    <!-- Retry Button (Hidden Initially) -->
+    <button id="retryBtn" class="hidden w-full bg-gradient-to-r from-red-500 to-orange-500 py-3 rounded-lg font-medium">
+      Retry Payment
+    </button>
+
+    <!-- Status Indicator -->
+    <div class="flex items-center justify-center text-xs text-gray-400 mt-4">
+      <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+      <span>Processing Active</span>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentBtn = document.getElementById('paymentBtn');
+      const loadingBar = document.getElementById('loadingBar');
+      const progressFill = document.getElementById('progressFill');
+      const failureMsg = document.getElementById('failureMsg');
+      const retryBtn = document.getElementById('retryBtn');
+
+      // Copy functionality
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const text = e.currentTarget.parentElement.querySelector('p.text-lg, p.font-mono').textContent;
+          navigator.clipboard.writeText(text);
+          
+          const icon = e.currentTarget.querySelector('i');
+          icon.className = 'fas fa-check text-green-400';
+          setTimeout(() => {
+            icon.className = 'fas fa-copy';
+          }, 2000);
+        });
+      });
+
+      // Payment button click
+      paymentBtn.addEventListener('click', () => {
+        paymentBtn.classList.add('hidden');
+        loadingBar.classList.remove('hidden');
+        
+        // Uneven loading animation over 10 seconds
+        let progress = 0;
+        const interval = setInterval(() => {
+          // Random increment between 1-10%
+          const increment = Math.floor(Math.random() * 10) + 1;
+          progress = Math.min(progress + increment, 100);
+          progressFill.style.width = progress + '%';
+          
+          if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              loadingBar.classList.add('hidden');
+              failureMsg.classList.remove('hidden');
+              retryBtn.classList.remove('hidden');
+            }, 500);
+          }
+        }, 800); // Total time will vary due to random increments
+      });
+
+      // Retry button
+      retryBtn.addEventListener('click', () => {
+        failureMsg.classList.add('hidden');
+        retryBtn.classList.add('hidden');
+        paymentBtn.classList.remove('hidden');
+        progressFill.style.width = '0%';
+      });
+    });
+  </script>
+</body>
+</html>

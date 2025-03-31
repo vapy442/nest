@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PayNest - Help Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0D0D0D 0%, #1a1a2e 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .contact-card {
+      background: linear-gradient(135deg, rgba(255,165,0,0.1) 0%, rgba(0,191,255,0.1) 100%);
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+    .form-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: rgba(255, 165, 0, 0.6);
+    }
+    .success-message {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid #10b981;
+    }
+  </style>
+</head>
+<body class="text-white font-sans p-4">
+  <div class="max-w-md mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <a href="home.html" class="glass p-2 rounded-lg w-10 h-10 flex items-center justify-center">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1 class="text-xl font-bold">Help Center</h1>
+      <div class="w-10"></div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="glass p-3 rounded-xl mb-6 flex items-center">
+      <i class="fas fa-search text-gray-400 mr-2"></i>
+      <input type="text" placeholder="Search help articles..." class="bg-transparent w-full focus:outline-none placeholder-gray-400">
+    </div>
+
+    <!-- Contact Form -->
+    <div class="glass-card rounded-xl p-5 mb-6">
+      <h2 class="text-lg font-medium mb-4">Submit Your Question</h2>
+      
+      <form id="helpForm">
+        <div class="mb-4">
+          <label class="block text-sm text-gray-400 mb-2">Email Address</label>
+          <input type="email" name="email" required class="form-input w-full p-3 rounded-lg">
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm text-gray-400 mb-2">Subject</label>
+          <select name="subject" class="form-input w-full p-3 rounded-lg">
+            <option value="Wallet Issues">Wallet Issues</option>
+            <option value="Deposit Problems">Deposit Problems</option>
+            <option value="Withdrawal Help">Withdrawal Help</option>
+            <option value="Account Security">Account Security</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm text-gray-400 mb-2">Your Message</label>
+          <textarea name="message" rows="4" required class="form-input w-full p-3 rounded-lg"></textarea>
+        </div>
+        
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="urgent" name="urgent" class="mr-2">
+          <label for="urgent" class="text-sm text-gray-300">This is urgent</label>
+        </div>
+        
+        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-blue-500 py-3 rounded-lg font-medium">
+          Submit Question
+        </button>
+      </form>
+      
+      <!-- Success Message (Hidden Initially) -->
+      <div id="successMessage" class="success-message p-4 rounded-lg mt-4 hidden">
+        <div class="flex items-center">
+          <i class="fas fa-check-circle text-green-400 mr-2"></i>
+          <p>Your message has been submitted! We'll respond within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <h2 class="text-lg font-medium mb-3">Frequently Asked Questions</h2>
+    <div class="glass rounded-xl overflow-hidden mb-6">
+      <div class="p-4 border-b border-gray-700">
+        <h3 class="font-medium">How do I reset my password?</h3>
+        <p class="text-gray-300 text-sm mt-2">Go to your profile settings and select 'Change Password'. You'll receive a reset link via email.</p>
+      </div>
+      <div class="p-4 border-b border-gray-700">
+        <h3 class="font-medium">Why is my transaction pending?</h3>
+        <p class="text-gray-300 text-sm mt-2">Transactions may take 5-30 minutes to process depending on network congestion.</p>
+      </div>
+      <div class="p-4">
+        <h3 class="font-medium">How do I verify my account?</h3>
+        <p class="text-gray-300 text-sm mt-2">Upload a clear photo of your ID in the verification section of your profile.</p>
+      </div>
+    </div>
+
+    <!-- Contact Support -->
+    <h2 class="text-lg font-medium mb-3">Immediate Assistance</h2>
+    <div class="contact-card glass p-5 rounded-xl mb-6">
+      <div class="flex items-center mb-4">
+        <div class="w-10 h-10 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-headset text-blue-400"></i>
+        </div>
+        <div>
+          <h3 class="font-medium">24/7 Live Chat</h3>
+          <p class="text-gray-300 text-sm">Get instant help from our support team</p>
+          <button class="text-blue-400 text-sm font-medium mt-1">Start Chat</button>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-orange-500 bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-phone-alt text-orange-400"></i>
+        </div>
+        <div>
+          <h3 class="font-medium">Call Support</h3>
+          <p class="text-gray-300 text-sm">+234 800 555 5555</p>
+          <p class="text-gray-400 text-xs">Available 8AM-8PM daily</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const helpForm = document.getElementById('helpForm');
+      const successMessage = document.getElementById('successMessage');
+      
+      // Form submission
+      helpForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Simulate form submission
+        setTimeout(() => {
+          // Show success message
+          successMessage.classList.remove('hidden');
+          helpForm.reset();
+          
+          // Hide after 5 seconds
+          setTimeout(() => {
+            successMessage.classList.add('hidden');
+          }, 5000);
+        }, 1000);
+      });
+
+      // Make FAQ items expandable
+      const faqItems = document.querySelectorAll('.glass.rounded-xl > div');
+      faqItems.forEach(item => {
+        const answer = item.querySelector('p');
+        answer.classList.add('hidden');
+        
+        item.addEventListener('click', () => {
+          answer.classList.toggle('hidden');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
