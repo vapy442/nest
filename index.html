@@ -333,7 +333,7 @@
         localStorage.setItem('users', JSON.stringify(users));
         localStorage.setItem('username', username);
         localStorage.setItem('Aza', user.balance);
-        window.location.href = 'https://67ea81c582c8d60cf3b0b3c0--thunderous-sunshine-28c991.netlify.app/'; // Direct navigation to specified URL
+        window.location.href = 'home.html'; // Direct navigation to home page
       }
     });
 
@@ -358,7 +358,7 @@
       if (user) {
         localStorage.setItem('username', user.username);
         localStorage.setItem('Aza', user.balance);
-        window.location.href = 'https://67ea81c582c8d60cf3b0b3c0--thunderous-sunshine-28c991.netlify.app/'; // Direct navigation to specified URL
+        window.location.href = 'home.html'; // Direct navigation to home page
       } else {
         errorMessage.textContent = 'Invalid username or password.';
         errorMessage.classList.remove('hidden');
